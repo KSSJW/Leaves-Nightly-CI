@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Git
+      - run: |
+          git config --global user.email "ci-bot@example.com"
+          git config --global user.name "CI Bot"
+
       - name: Add upstream
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
