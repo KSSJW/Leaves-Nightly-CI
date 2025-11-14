@@ -34,7 +34,6 @@ jobs:
 
       - name: Build with Gradle
         run: |
-        ./gradlew clean
         ./gradlew applyAllPatches
         ./gradlew createMojmapLeavesclipJar
 
