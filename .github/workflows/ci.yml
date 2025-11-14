@@ -31,17 +31,17 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'microsoft'
 
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
 
       - name: Build with Gradle applyAllPatches
-        run: ./gradlew applyAllPatches --enable-preview
+        run: ./gradlew applyAllPatches
 
       - name: Build with Gradle createMojmapLeavesclipJar
-        run: ./gradlew createMojmapLeavesclipJar --enable-preview
+        run: ./gradlew createMojmapLeavesclipJar
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v4
