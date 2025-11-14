@@ -16,7 +16,7 @@ jobs:
       - name: Add upstream
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
-          git fetch upstream main
+          git fetch upstream dev/1.21.10
           echo "upstream_sha=$(git rev-parse upstream/main)" >> $GITHUB_OUTPUT
         id: upstream
         
