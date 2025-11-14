@@ -38,10 +38,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle applyAllPatches
-        run: ./gradlew applyAllPatches
+        run: ./gradlew applyAllPatches --enable-preview
 
       - name: Build with Gradle createMojmapLeavesclipJar
-        run: ./gradlew createMojmapLeavesclipJar
+        run: ./gradlew createMojmapLeavesclipJar --enable-preview
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v4
