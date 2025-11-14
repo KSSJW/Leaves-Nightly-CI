@@ -34,8 +34,8 @@ jobs:
 
       - name: Build with Gradle
         run: |
-        ./gradlew applyAllPatches
-        ./gradlew createMojmapLeavesclipJar
+          ./gradlew applyAllPatches
+          ./gradlew createMojmapLeavesclipJar
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v3
