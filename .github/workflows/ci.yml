@@ -29,9 +29,11 @@ jobs:
       - name: validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
 
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
         run: |
-        chmod +x ./gradlew
         ./gradlew clean
         ./gradlew applyAllPatches
         ./gradlew createMojmapLeavesclipJar
