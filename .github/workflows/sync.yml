@@ -25,8 +25,31 @@ jobs:
           git remote add upstream https://github.com/LeavesMC/Leaves.git
           git fetch upstream dev/1.21.10
 
-      - name: Fast-forward to upstream
+      - name: Check for updates
+        id: check
+        run: |
+          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          LOCAL_SHA=$(git rev-parse HEAD)
+          echo "Upstream SHA: $UPSTREAM_SHA"
+          echo "Local SHA: $LOCAL_SHA"
+          if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
+            echo "No updates found."
+            echo "updated=false" >> $GITHUB_ENV
+            exit 0
+          else
+            echo "Updates found."
+            echo "updated=true" >> $GITHUB_ENV
+            echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
+          fi
+
+      - name: Sync changes
+        if: env.updated == 'true'
         run: |
           git checkout main
           git reset --hard upstream/main
           git push origin main --force
+
+      - name: Send notification
+        if: env.updated == 'true' && success()
+        run: |
+          echo "✅ Sync successful with upstream commit $UPSTREAM_SHA"
