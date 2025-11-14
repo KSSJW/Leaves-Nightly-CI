@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get upstream SHA
+        run: echo "UPSTREAM_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Configure Git identity
         run: |
@@ -22,7 +27,6 @@ jobs:
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
           git fetch upstream dev/1.21.10
-          echo "upstream_sha=$(git rev-parse upstream/main)" >> $GITHUB_OUTPUT
         id: upstream
         
       - name: validate gradle wrapper
@@ -64,9 +68,9 @@ jobs:
       - name: Release CI
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: upstream-${{ steps.upstream.outputs.upstream_sha }}
-          name: Upstream Build ${{ steps.upstream.outputs.upstream_sha }}
+          tag_name: upstream-${{ env.UPSTREAM_SHA }}
+          release_name: Upstream Build ${{ env.UPSTREAM_SHA }}
           body: |
             This build is based on the upstream commit:
-            [${{ steps.upstream.outputs.upstream_sha }}](https://github.com/LeavesMC/Leaves/commit/${{ steps.upstream.outputs.upstream_sha }})
+            [${{ env.UPSTREAM_SHA }}](https://github.com/LeavesMC/Leaves/commit/${{ env.UPSTREAM_SHA }})
           files: leaves-server/build/libs/*.jar
