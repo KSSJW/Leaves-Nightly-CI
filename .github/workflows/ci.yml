@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Git
+      - name: Configure Git identity
       - run: |
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
