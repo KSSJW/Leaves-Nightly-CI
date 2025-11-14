@@ -1,0 +1,62 @@
+name: CI Build & Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # 可手动触发
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/LeavesMC/Leaves.git
+          git fetch upstream main
+          echo "upstream_sha=$(git rev-parse upstream/main)" >> $GITHUB_OUTPUT
+        id: upstream
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: |
+        chmod +x gradlew
+        ./gradlew clean
+        ./gradlew applyAllPatches
+        ./gradlew createMojmapLeavesclipJar
+
+      - name: Upload server artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: server
+          path: leaves-server/build/libs/leaves-server-*.jar
+
+      - name: Upload leavesclip artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: leavesclip
+          path: leaves-server/build/libs/leaves-leavesclip-*.jar
+
+      - name: Upload bundler artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundler
+          path: leaves-server/build/libs/leaves-bundler-*.jar
+
+      - name: Release CI
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: upstream-${{ steps.upstream.outputs.upstream_sha }}
+          name: Upstream Build ${{ steps.upstream.outputs.upstream_sha }}
+          body: |
+            This build is based on the upstream commit:
+            [${{ steps.upstream.outputs.upstream_sha }}](https://github.com/LeavesMC/Leaves/commit/${{ steps.upstream.outputs.upstream_sha }})
+          files: leaves-server/build/libs/*.jar

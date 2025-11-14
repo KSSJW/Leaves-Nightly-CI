@@ -1,0 +1,32 @@
+name: Sync Upstream (Fast-Forward)
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # 每小时检查一次
+  workflow_dispatch:       # 也可以手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/LeavesMC/Leaves.git
+          git fetch upstream dev/1.21.10
+
+      - name: Fast-forward to upstream
+        run: |
+          git checkout main
+          git reset --hard upstream/main
+          git push origin main --force
