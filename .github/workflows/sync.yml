@@ -51,7 +51,6 @@ jobs:
         run: |
           git checkout src
           git reset --hard upstream/dev/1.21.10
-          git checkout origin/src -- .github/workflows
           git commit -am "Sync upstream (keep local workflows)" || echo "No changes"
           git push origin src --force
 
