@@ -51,7 +51,8 @@ jobs:
         run: |
           git checkout src
           git reset --hard upstream/dev/1.21.10
-          git commit -am "Sync upstream (keep local workflows)" || echo "No changes"
+          git rm -r --cached .github/workflows || true
+          git commit -am "Sync upstream (code only)" || echo "No changes"
           git push origin src --force
 
       - name: Send notification
