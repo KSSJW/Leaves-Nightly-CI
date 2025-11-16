@@ -50,10 +50,9 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git reset --hard upstream/dev/1.21.10
-          git rm -r --cached .github/workflows || true
-          git commit -am "Sync upstream (code only)" || echo "No changes"
-          git push origin src --force
+          git merge --no-edit upstream/dev/1.21.10 || echo "Already up to date"
+          git commit --allow-empty -m "chore: sync upstream to src (commit $UPSTREAM_SHA)"
+          git push origin src
 
       - name: Send notification
         if: env.updated == 'true' && success()
