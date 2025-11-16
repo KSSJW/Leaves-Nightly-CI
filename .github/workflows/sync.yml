@@ -1,0 +1,58 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # 每小时检查一次
+  workflow_dispatch:       # 也可以手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: src
+          persist-credentials: false
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/LeavesMC/Leaves.git
+          git fetch upstream dev/1.21.10
+
+      - name: Check for updates
+        id: check
+        run: |
+          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          LOCAL_SHA=$(git rev-parse HEAD)
+          echo "Upstream SHA: $UPSTREAM_SHA"
+          echo "Local SHA: $LOCAL_SHA"
+          if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
+            echo "No updates found."
+            echo "updated=false" >> $GITHUB_ENV
+            exit 0
+          else
+            echo "Updates found."
+            echo "updated=true" >> $GITHUB_ENV
+            echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
+          fi
+
+      - name: Sync changes
+        if: env.updated == 'true'
+        run: |
+          git reset --hard upstream/dev/1.21.10
+          git push origin src --force
+
+      - name: Send notification
+        if: env.updated == 'true' && success()
+        run: |
+          echo "✅ Sync successful with upstream commit $UPSTREAM_SHA"
