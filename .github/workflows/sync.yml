@@ -27,6 +27,7 @@ jobs:
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
           git fetch upstream dev/1.21.10
+          git fetch origin src
 
       - name: Check for updates
         id: check
@@ -48,10 +49,13 @@ jobs:
       - name: Sync changes
         if: env.updated == 'true'
         run: |
+          git checkout src
           git reset --hard upstream/dev/1.21.10
+          git checkout origin/src -- .github/workflows
+          git commit -am "Sync upstream (keep local workflows)" || echo "No changes"
           git push origin src --force
 
       - name: Send notification
         if: env.updated == 'true' && success()
         run: |
-          echo "✅ Sync successful with upstream commit $UPSTREAM_SHA"
+          echo "Sync successful with upstream commit $UPSTREAM_SHA"
