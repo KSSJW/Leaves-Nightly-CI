@@ -34,8 +34,10 @@ jobs:
         id: check
         run: |
           UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          SHORT_SHA=$(git rev-parse --short=7 refs/remotes/upstream/dev/1.21.10)
           LOCAL_SHA=$(git rev-parse refs/remotes/origin/src)
           echo "Upstream SHA: $UPSTREAM_SHA"
+          echo "Short SHA: $SHORT_SHA"
           echo "Local SHA: $LOCAL_SHA"
           if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
             echo "updated=false" >> $GITHUB_ENV
@@ -43,6 +45,7 @@ jobs:
           else
             echo "updated=true" >> $GITHUB_ENV
             echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
+            echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
           fi
 
       - name: Sync changes
@@ -50,6 +53,7 @@ jobs:
         run: |
           git checkout src
           git merge --no-edit upstream/dev/1.21.10
+          git commit -m "chore: sync upstream to src (来自上游的commit $SHORT_SHA)"
           git push origin src
 
       - name: Send notification
