@@ -3,7 +3,12 @@ name: CI Build & Release
 on:
   push:
     branches: [ src ]
-  workflow_dispatch:   # 可手动触发
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  contents: write
 
 jobs:
   build-release:
@@ -32,44 +37,66 @@ jobs:
           SHORT_SHA=$(git rev-parse --short refs/remotes/upstream/dev/1.21.10)
           echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
-        
+
+      - name: Check if release already exists
+        id: check
+        run: |
+          if gh release view upstream-${SHORT_SHA} >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_ENV
+            echo "Release upstream-${SHORT_SHA} already exists, skipping build."
+          else
+            echo "exists=false" >> $GITHUB_ENV
+            echo "No release found for upstream-${SHORT_SHA}, proceeding with build."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: validate gradle wrapper
+        if: env.exists == 'false'
         uses: gradle/actions/wrapper-validation@v4
 
       - name: Set up JDK
+        if: env.exists == 'false'
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: make gradle wrapper executable
+        if: env.exists == 'false'
         run: chmod +x ./gradlew
 
       - name: Build with Gradle applyAllPatches
+        if: env.exists == 'false'
         run: ./gradlew applyAllPatches
 
       - name: Build with Gradle createMojmapLeavesclipJar
+        if: env.exists == 'false'
         run: ./gradlew createMojmapLeavesclipJar
 
       - name: Upload server artifact
+        if: env.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: server
           path: leaves-server/build/libs/leaves-server-*.jar
 
       - name: Upload leavesclip artifact
+        if: env.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: leavesclip
           path: leaves-server/build/libs/leaves-leavesclip-*.jar
 
       - name: Upload bundler artifact
+        if: env.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: bundler
           path: leaves-server/build/libs/leaves-bundler-*.jar
 
       - name: Release CI
+        if: env.exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: upstream-${{ env.SHORT_SHA }}
