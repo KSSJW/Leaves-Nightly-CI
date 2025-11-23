@@ -52,9 +52,13 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git merge --no-edit upstream/dev/1.21.10
-          git commit -m "chore: sync upstream to src (来自上游的commit $SHORT_SHA)"
-          git push origin src
+          git merge --no-edit upstream/dev/1.21.10 || echo "Already up to date"
+          if ! git diff --quiet HEAD; then
+            git commit -m "chore: sync upstream to src (commit $SHORT_SHA)"
+            git push origin src
+          else
+            echo "No changes to commit after merge."
+          fi
 
       - name: Send notification
         if: env.updated == 'true' && success()
