@@ -13,10 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout src branch
         uses: actions/checkout@v3
         with:
           ref: src
+          fetch-depth: 0
 
       - name: Set up Git
         run: |
@@ -33,15 +34,13 @@ jobs:
         id: check
         run: |
           UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
-          LOCAL_SHA=$(git rev-parse HEAD)
+          LOCAL_SHA=$(git rev-parse refs/remotes/origin/src)
           echo "Upstream SHA: $UPSTREAM_SHA"
           echo "Local SHA: $LOCAL_SHA"
           if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
-            echo "No updates found."
             echo "updated=false" >> $GITHUB_ENV
-            exit 0
+            echo "No updates found, skipping sync."
           else
-            echo "Updates found."
             echo "updated=true" >> $GITHUB_ENV
             echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
           fi
@@ -50,11 +49,10 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git merge --no-edit upstream/dev/1.21.10 || echo "Already up to date"
-          git commit --allow-empty -m "chore: sync upstream to src (commit $UPSTREAM_SHA)"
+          git merge --no-edit upstream/dev/1.21.10
           git push origin src
 
       - name: Send notification
         if: env.updated == 'true' && success()
         run: |
-          echo "Sync successful with upstream commit $UPSTREAM_SHA"
+          echo "✅ Sync successful with upstream commit $UPSTREAM_SHA"
