@@ -47,13 +47,15 @@ jobs:
             echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
           fi
 
-      - name: Sync changes
+      - name: Sync changes (exclude workflows)
         if: env.updated == 'true'
         run: |
           git checkout src
           git reset --hard upstream/dev/1.21.10
-          git checkout origin/src -- .github/workflows/
-          git commit -m "chore: sync upstream to src (commit $SHORT_SHA)"
+          # 确保 workflows 目录不被同步（如果存在则恢复为空）
+          git rm -r --cached .github/workflows || true
+          rm -rf .github/workflows || true
+          git commit --allow-empty -m "chore: sync upstream to src (commit $SHORT_SHA)"
           git push origin src --force
 
       - name: Send notification
