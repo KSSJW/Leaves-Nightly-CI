@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 env:
-  upstream_branch: &upstream_branch "master"
+  upstream_branch: "master"
 
 jobs:
   build-release:
@@ -32,12 +32,12 @@ jobs:
       - name: Add upstream
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
-          git fetch upstream *upstream_branch
+          git fetch upstream $upstream_branch
 
       - name: Get upstream SHA
         run: |
-          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/*upstream_branch)
-          SHORT_SHA=$(git rev-parse --short refs/remotes/upstream/*upstream_branch)
+          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/$upstream_branch)
+          SHORT_SHA=$(git rev-parse --short refs/remotes/upstream/$upstream_branch)
           echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
 
