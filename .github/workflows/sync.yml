@@ -52,10 +52,10 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git merge --no-edit upstream/dev/1.21.10 || echo "Already up to date"
+          git reset --hard upstream/dev/1.21.10 || echo "Already up to date"
           if ! git diff --quiet HEAD; then
             git commit -m "chore: sync upstream to src (commit $SHORT_SHA)"
-            git push origin src
+            git push origin src --force
           else
             echo "No changes to commit after merge."
           fi
