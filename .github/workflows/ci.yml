@@ -26,22 +26,27 @@ jobs:
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
 
-      - name: Get synced commit SHA
+      - name: Add upstream
         run: |
-          UPSTREAM_SHA=$(git rev-parse HEAD)
-          SHORT_SHA=$(git rev-parse --short HEAD)
+          git remote add upstream https://github.com/LeavesMC/Leaves.git
+          git fetch upstream dev/1.21.10
+
+      - name: Get upstream SHA
+        run: |
+          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          SHORT_SHA=$(git rev-parse --short refs/remotes/upstream/dev/1.21.10)
           echo "UPSTREAM_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
 
       - name: Check if release already exists
         id: check
         run: |
-          if gh release view upstream-${UPSTREAM_SHA} >/dev/null 2>&1; then
+          if gh release view upstream-${SHORT_SHA} >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_ENV
-            echo "Release upstream-${UPSTREAM_SHA} already exists, skipping build."
+            echo "Release upstream-${SHORT_SHA} already exists, skipping build."
           else
             echo "exists=false" >> $GITHUB_ENV
-            echo "No release found for upstream-${UPSTREAM_SHA}, proceeding with build."
+            echo "No release found for upstream-${SHORT_SHA}, proceeding with build."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,9 +99,9 @@ jobs:
         if: env.exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: upstream-${{ env.UPSTREAM_SHA }}
+          tag_name: upstream-${{ env.SHORT_SHA }}
           release_name: Upstream Build ${{ env.SHORT_SHA }}
           body: |
-            This build is based on the synced commit:
-            [${{ env.SHORT_SHA }}](https://github.com/LeavesMC/Leaves/commit/${{ env.UPSTREAM_SHA }})
+            This build is based on the upstream commit:
+            [${{ env.SHORT_SHA }}](https://github.com/LeavesMC/Leaves/commit/${{ env.SHORT_SHA }})
           files: leaves-server/build/libs/*.jar
