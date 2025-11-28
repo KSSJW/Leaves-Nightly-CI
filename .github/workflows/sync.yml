@@ -34,10 +34,9 @@ jobs:
         id: check
         run: |
           UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          LOCAL_SHA=$(git rev-parse refs/heads/src)
           SHORT_SHA=$(git rev-parse --short=7 refs/remotes/upstream/dev/1.21.10)
-          LOCAL_SHA=$(git rev-parse refs/remotes/origin/src)
           echo "Upstream SHA: $UPSTREAM_SHA"
-          echo "Short SHA: $SHORT_SHA"
           echo "Local SHA: $LOCAL_SHA"
           if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
             echo "updated=false" >> $GITHUB_ENV
@@ -52,13 +51,9 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git reset --hard upstream/dev/1.21.10 || echo "Already up to date"
-          if ! git diff --quiet HEAD; then
-            git commit -m "chore: sync upstream to src (commit $SHORT_SHA)"
-            git push origin src --force
-          else
-            echo "No changes to commit after merge."
-          fi
+          git reset --hard upstream/dev/1.21.10
+          git commit --allow-empty -m "chore: sync upstream to src (commit $SHORT_SHA)"
+          git push origin src --force
 
       - name: Send notification
         if: env.updated == 'true' && success()
