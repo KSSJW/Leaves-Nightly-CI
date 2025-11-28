@@ -52,8 +52,8 @@ jobs:
         run: |
           git checkout src
           git reset --hard upstream/dev/1.21.10
-          git restore --source=origin/src .github/workflows/
-          git commit --allow-empty -m "chore: sync upstream to src (commit $SHORT_SHA)"
+          git checkout origin/src -- .github/workflows/
+          git commit -m "chore: sync upstream to src (commit $SHORT_SHA)"
           git push origin src --force
 
       - name: Send notification
