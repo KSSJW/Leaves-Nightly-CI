@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  upstream_branch: &upstream_branch "master"
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -27,15 +30,15 @@ jobs:
       - name: Add upstream
         run: |
           git remote add upstream https://github.com/LeavesMC/Leaves.git
-          git fetch upstream dev/1.21.10
+          git fetch upstream *upstream_branch
           git fetch origin src
 
       - name: Check for updates
         id: check
         run: |
-          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/dev/1.21.10)
+          UPSTREAM_SHA=$(git rev-parse refs/remotes/upstream/*upstream_branch)
           LOCAL_SHA=$(git rev-parse refs/heads/src)
-          SHORT_SHA=$(git rev-parse --short=7 refs/remotes/upstream/dev/1.21.10)
+          SHORT_SHA=$(git rev-parse --short=7 refs/remotes/upstream/*upstream_branch)
           echo "Upstream SHA: $UPSTREAM_SHA"
           echo "Local SHA: $LOCAL_SHA"
           if [ "$UPSTREAM_SHA" = "$LOCAL_SHA" ]; then
@@ -51,7 +54,7 @@ jobs:
         if: env.updated == 'true'
         run: |
           git checkout src
-          git reset --hard upstream/dev/1.21.10
+          git reset --hard upstream/*upstream_branch
           # 确保 workflows 目录不被同步（如果存在则恢复为空）
           git rm -r --cached .github/workflows || true
           rm -rf .github/workflows || true
