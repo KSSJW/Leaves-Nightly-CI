@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 env:
-  upstream_branch: "1.21.11"
+  upstream_branch: "dev/1.21.11"
 
 jobs:
   build-release:
