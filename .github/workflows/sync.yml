@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  upstream_branch: "master"
+  upstream_branch: "1.21.11"
 
 jobs:
   sync:
