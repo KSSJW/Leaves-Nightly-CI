@@ -108,3 +108,8 @@ jobs:
             This build is based on the upstream commit:
             [${{ env.SHORT_SHA }}](https://github.com/LeavesMC/Leaves/commit/${{ env.SHORT_SHA }})
           files: leaves-server/build/libs/*.jar
+
+      - name: Send notification
+        if: ${{ success() }}
+        run: |
+          echo "Build succeeded!"
