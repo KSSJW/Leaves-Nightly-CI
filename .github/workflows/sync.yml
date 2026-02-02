@@ -2,8 +2,8 @@ name: Sync Upstream
 
 on:
   schedule:
-    - cron: '0 * * * *'   # 每小时检查一次
-  workflow_dispatch:       # 也可以手动触发
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
